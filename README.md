@@ -1,4 +1,5 @@
 # Lambda-CI
+[![Go Report Card](https://goreportcard.com/badge/github.com/alexzimmer96/lambda-ci)](https://goreportcard.com/report/github.com/alexzimmer96/lambda-ci)
 
 ## Description
 
