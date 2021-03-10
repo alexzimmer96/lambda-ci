@@ -16,6 +16,11 @@ When it finds such a file, the referenced Go source is built, zipped and deploye
     * `AWS_SECRET_ACCESS_KEY`
     * `AWS_REGION`
 
+## Example Usage
+```bash
+AWS_REGION="eu-central-1" lambda-ci
+```
+
 ## File Structure
 ```yaml
 # Name of the Function used on AWS.
