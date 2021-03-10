@@ -15,10 +15,10 @@ import (
 	"strings"
 )
 
-type FunctionConfig struct {
-	Name              string `yaml:"name"`
-	FileName          string `yaml:"fileName"`
-	Path              string `yaml:"-"`
+type functionConfig struct {
+	Name     string `yaml:"name"`
+	FileName string `yaml:"fileName"`
+	Path     string `yaml:"-"`
 }
 
 func main() {
@@ -57,28 +57,28 @@ func main() {
 }
 
 // getBuildOutputPath returns the path where the built function file should be written to.
-func (conf *FunctionConfig) getBuildOutputPath() string {
+func (conf *functionConfig) getBuildOutputPath() string {
 	return fmt.Sprintf("%s/%s", conf.Path, conf.Name)
 }
 
 // getZipOutputPath returns the path where the zipped built should be written to.
-func (conf *FunctionConfig) getZipOutputPath() string {
+func (conf *functionConfig) getZipOutputPath() string {
 	return fmt.Sprintf("%s/%s.zip", conf.Path, conf.Name)
 }
 
-// mustDeleteBuildFile deletes the built file for this FunctionConfig.
-func (conf *FunctionConfig) mustDeleteBuildFile() {
+// mustDeleteBuildFile deletes the built file for this functionConfig.
+func (conf *functionConfig) mustDeleteBuildFile() {
 	if err := os.Remove(conf.getBuildOutputPath()); err != nil {
 		logrus.WithError(err).Fatalf("error while deleting build at %s", conf.getBuildOutputPath())
 	}
 }
 
-func (conf *FunctionConfig) getFullFilePath() string {
+func (conf *functionConfig) getFullFilePath() string {
 	return fmt.Sprintf("%s/%s", conf.Path, conf.FileName)
 }
 
-// mustDeleteBuildFile deletes the built file for this FunctionConfig.
-func (conf *FunctionConfig) mustDeleteZipFile() {
+// mustDeleteBuildFile deletes the built file for this functionConfig.
+func (conf *functionConfig) mustDeleteZipFile() {
 	if err := os.Remove(conf.getZipOutputPath()); err != nil {
 		logrus.WithError(err).Fatalf("error while deleting build at %s", conf.getBuildOutputPath())
 	}
@@ -86,15 +86,15 @@ func (conf *FunctionConfig) mustDeleteZipFile() {
 
 // build runs the go build command for the referenced source file.
 // Returns the path of the output file.
-func (conf *FunctionConfig) build() error {
+func (conf *functionConfig) build() error {
 	if err := exec.Command("go", "build", "-o", conf.getBuildOutputPath(), conf.getFullFilePath()).Run(); err != nil {
 		return err
 	}
 	return nil
 }
 
-// zipBuild puts the built for this FunctionConfig into a zip file.
-func (conf *FunctionConfig) zipBuild() error {
+// zipBuild puts the built for this functionConfig into a zip file.
+func (conf *functionConfig) zipBuild() error {
 	zipFile, err := os.Create(conf.getZipOutputPath())
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (conf *FunctionConfig) zipBuild() error {
 
 // updateLambda takes the built and zipped go file and updates the corresponding Lambda function.
 // This functions also checks if the handler name is still correct.
-func (conf *FunctionConfig) updateLambda() error {
+func (conf *functionConfig) updateLambda() error {
 	data, err := ioutil.ReadFile(conf.getZipOutputPath())
 	if err != nil {
 		return err
@@ -149,7 +149,7 @@ func (conf *FunctionConfig) updateLambda() error {
 
 	lambdaInfo, err := lambdaSess.UpdateFunctionCode(&lambda.UpdateFunctionCodeInput{
 		FunctionName: &conf.Name,
-		ZipFile: data,
+		ZipFile:      data,
 	})
 
 	if err != nil {
@@ -192,13 +192,13 @@ func findFunctionConfigs(root string) ([]string, error) {
 }
 
 // parseFunctionConfig parses a .function.yaml file at the given path
-func parseFunctionConfig(path string) (*FunctionConfig, error) {
+func parseFunctionConfig(path string) (*functionConfig, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	var function FunctionConfig
+	var function functionConfig
 	if err := yaml.Unmarshal(data, &function); err != nil {
 		return nil, err
 	}
